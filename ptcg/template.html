@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__PAGE_TITLE__</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f4f5f8;
+    --panel: #ffffff;
+    --panel-2: #fafbfc;
+    --ink: #17181c;
+    --ink-soft: #5c6270;
+    --ink-faint: #8b91a0;
+    --line: #e2e5ea;
+    --accent: #b3282d;
+    --accent-soft: #fdecec;
+    --focus: #2b6cb0;
+    --tcg: #d9453f;
+    --vg: #2f6fd0;
+    --pgo: #17a2a2;
+    --unite: #e08615;
+    --champ: #7b4fc9;
+    --radius: 10px;
+    --shadow: 0 1px 2px rgba(16,18,24,.06), 0 4px 16px rgba(16,18,24,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1c1f26;
+      --panel-2: #22262e;
+      --ink: #e9ecf1;
+      --ink-soft: #a6adbb;
+      --ink-faint: #767d8c;
+      --line: #2e333d;
+      --accent: #ef5350;
+      --accent-soft: #3a2224;
+      --focus: #7aa7e0;
+      --tcg: #ef5f59;
+      --vg: #5b93e6;
+      --pgo: #2bc0c0;
+      --unite: #f0a03c;
+      --champ: #a37ce8;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--focus); }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+
+  /* ---------- header ---------- */
+  header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    padding: 18px 20px 14px;
+  }
+  .head-wrap { max-width: 1440px; margin: 0 auto; }
+  h1 { margin: 0; font-size: 20px; letter-spacing: -.01em; }
+  .sub { color: var(--ink-soft); font-size: 13px; margin-top: 3px; }
+  .stats { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .stat {
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 8px 12px; min-width: 96px;
+  }
+  .stat b { display: block; font-size: 18px; line-height: 1.2; }
+  .stat span { color: var(--ink-faint); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+
+  /* ---------- layout ---------- */
+  .layout {
+    max-width: 1440px; margin: 0 auto; padding: 16px 20px 60px;
+    display: grid; grid-template-columns: 264px minmax(0, 1fr); gap: 16px; align-items: start;
+  }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+  }
+  aside { position: sticky; top: 14px; }
+  @media (max-width: 900px) { aside { position: static; } }
+  .filters { padding: 14px; max-height: calc(100vh - 60px); overflow-y: auto; }
+  .fgroup { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
+  .fgroup:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+  .flabel {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--ink-faint); margin-bottom: 8px; display: flex;
+    justify-content: space-between; align-items: center;
+  }
+  .flabel button {
+    background: none; border: 0; color: var(--focus); font-size: 11px; padding: 0;
+    text-transform: none; letter-spacing: 0;
+  }
+  label.check {
+    display: flex; gap: 8px; align-items: center; padding: 3px 0;
+    cursor: pointer; font-size: 13px;
+  }
+  label.check input { accent-color: var(--accent); margin: 0; flex: none; }
+  label.check .cnt { margin-left: auto; color: var(--ink-faint); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .scroll-list { max-height: 208px; overflow-y: auto; padding-right: 4px; }
+  .text-input, select {
+    width: 100%; padding: 7px 9px; border: 1px solid var(--line);
+    border-radius: 8px; background: var(--panel-2);
+  }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  .swatch { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+
+  /* ---------- toolbar ---------- */
+  .toolbar {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    padding: 10px 12px; margin-bottom: 14px;
+  }
+  .seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg button { background: var(--panel-2); border: 0; padding: 6px 13px; color: var(--ink-soft); }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .nav { display: flex; gap: 4px; align-items: center; }
+  .nav button {
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 8px; padding: 6px 11px;
+  }
+  .month-name { font-weight: 600; min-width: 148px; text-align: center; }
+  .spacer { flex: 1 1 auto; }
+  .ghost {
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 8px; padding: 6px 11px;
+  }
+
+  /* ---------- month grid ---------- */
+  .grid-head, .grid {
+    display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+  .grid-head div {
+    padding: 7px 8px; font-size: 11px; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--ink-faint); text-align: center;
+    border-bottom: 1px solid var(--line);
+  }
+  .day {
+    border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    min-height: 116px; padding: 5px 5px 7px;
+  }
+  .day:nth-child(7n) { border-right: 0; }
+  .day.pad { background: var(--panel-2); }
+  .daynum { font-size: 12px; color: var(--ink-faint); padding: 1px 4px; font-variant-numeric: tabular-nums; }
+  .day.today .daynum {
+    background: var(--accent); color: #fff; border-radius: 999px;
+    display: inline-block; min-width: 20px; text-align: center; font-weight: 600;
+  }
+  .chip {
+    display: block; width: 100%; text-align: left; border: 0;
+    background: var(--panel-2); border-left: 3px solid var(--ink-faint);
+    border-radius: 4px; padding: 3px 5px; margin-top: 3px;
+    font-size: 11.5px; line-height: 1.35; color: var(--ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .chip:hover { background: var(--accent-soft); }
+  .chip .t { color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+  .chip.tcg { border-left-color: var(--tcg); }
+  .chip.vg { border-left-color: var(--vg); }
+  .chip.pgo { border-left-color: var(--pgo); }
+  .chip.unite { border-left-color: var(--unite); }
+  .chip.champ { border-left-color: var(--champ); background: color-mix(in srgb, var(--champ) 12%, var(--panel-2)); font-weight: 600; }
+  .more { font-size: 11px; color: var(--focus); background: none; border: 0; padding: 2px 5px; }
+
+  /* ---------- list view ---------- */
+  .daygroup { border-bottom: 1px solid var(--line); padding: 10px 14px; }
+  .daygroup:last-child { border-bottom: 0; }
+  .daygroup h3 {
+    margin: 0 0 7px; font-size: 12px; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--ink-faint);
+  }
+  .row {
+    display: grid; grid-template-columns: 74px minmax(0,1fr) auto;
+    gap: 12px; align-items: baseline; width: 100%;
+    background: none; border: 0; border-left: 3px solid var(--ink-faint);
+    padding: 7px 9px; border-radius: 5px; text-align: left; margin-bottom: 3px;
+  }
+  .row:hover { background: var(--panel-2); }
+  .row.tcg { border-left-color: var(--tcg); }
+  .row.vg { border-left-color: var(--vg); }
+  .row.pgo { border-left-color: var(--pgo); }
+  .row.unite { border-left-color: var(--unite); }
+  .row.champ { border-left-color: var(--champ); }
+  .row .when { color: var(--ink-soft); font-variant-numeric: tabular-nums; font-size: 13px; }
+  .row .what b { font-weight: 600; }
+  .row .what span { display: block; color: var(--ink-faint); font-size: 12px; }
+  .row .dist { color: var(--ink-faint); font-size: 12px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .empty { padding: 48px 20px; text-align: center; color: var(--ink-faint); }
+
+  /* ---------- detail drawer ---------- */
+  .scrim {
+    position: fixed; inset: 0; background: rgba(10,12,16,.45);
+    display: flex; justify-content: flex-end; z-index: 40;
+  }
+  .drawer {
+    background: var(--panel); width: min(440px, 100%); height: 100%;
+    overflow-y: auto; padding: 20px 22px 40px; box-shadow: -8px 0 30px rgba(0,0,0,.2);
+  }
+  .drawer h2 { margin: 0 6px 4px 0; font-size: 18px; line-height: 1.3; }
+  .drawer .close {
+    float: right; background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 8px; width: 30px; height: 30px; line-height: 1; font-size: 16px;
+  }
+  .badges { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0 14px; }
+  .badge {
+    font-size: 11px; padding: 2px 8px; border-radius: 999px;
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--ink-soft);
+  }
+  .badge.tcg { border-color: var(--tcg); color: var(--tcg); }
+  .badge.vg { border-color: var(--vg); color: var(--vg); }
+  .badge.pgo { border-color: var(--pgo); color: var(--pgo); }
+  .badge.unite { border-color: var(--unite); color: var(--unite); }
+  .badge.champ { border-color: var(--champ); color: var(--champ); }
+  dl { margin: 0; display: grid; grid-template-columns: 92px minmax(0,1fr); gap: 7px 12px; font-size: 13px; }
+  dt { color: var(--ink-faint); }
+  dd { margin: 0; overflow-wrap: anywhere; }
+  .notes {
+    white-space: pre-wrap; background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 8px; padding: 10px 12px; margin-top: 14px; font-size: 13px;
+    color: var(--ink-soft); max-height: 260px; overflow-y: auto;
+  }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .actions a, .actions button {
+    text-decoration: none; padding: 7px 12px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); font-size: 13px;
+  }
+  .actions a.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .notice {
+    max-width: 1440px; margin: 14px auto 0; padding: 10px 14px;
+    background: var(--accent-soft); border: 1px solid var(--accent);
+    border-radius: var(--radius); color: var(--ink); font-size: 13px;
+  }
+  @media (max-width: 1480px) { .notice { margin: 14px 20px 0; } }
+  footer { max-width: 1440px; margin: 0 auto; padding: 0 20px 40px; color: var(--ink-faint); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-wrap">
+    <h1>__PAGE_TITLE__</h1>
+    <div class="sub" id="sub"></div>
+    <div class="stats" id="stats"></div>
+  </div>
+</header>
+
+<div id="notices"></div>
+
+<div class="layout">
+  <aside>
+    <div class="card filters">
+      <div class="fgroup">
+        <div class="flabel"><span>Search</span><button type="button" id="reset">Reset all</button></div>
+        <input class="text-input" type="search" id="q" placeholder="Event, store, city&hellip;">
+      </div>
+
+      <div class="fgroup">
+        <div class="flabel"><span>Distance</span><span id="distVal"></span></div>
+        <input type="range" id="dist" min="5" max="__MAX_RADIUS__" step="5" value="__MAX_RADIUS__">
+      </div>
+
+      <div class="fgroup">
+        <div class="flabel"><span>Game</span><button type="button" data-all="product">All</button></div>
+        <div id="fProducts"></div>
+      </div>
+
+      <div class="fgroup">
+        <div class="flabel"><span>Event type</span><button type="button" data-all="type">All</button></div>
+        <div id="fTypes" class="scroll-list"></div>
+      </div>
+
+      <div class="fgroup">
+        <div class="flabel"><span>Store / venue</span><button type="button" data-all="venue">All</button></div>
+        <input class="text-input" type="search" id="venueQ" placeholder="Filter venues" style="margin-bottom:6px">
+        <div id="fVenues" class="scroll-list"></div>
+      </div>
+
+      <div class="fgroup">
+        <div class="flabel"><span>Championship series</span></div>
+        <label class="check"><input type="checkbox" id="champOn" checked><span>Show Regionals &amp; above</span></label>
+        <select id="champRegion" style="margin-top:6px"></select>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="card toolbar">
+      <div class="seg">
+        <button type="button" id="vMonth" aria-pressed="true">Month</button>
+        <button type="button" id="vList" aria-pressed="false">List</button>
+      </div>
+      <div class="nav">
+        <button type="button" id="prev" aria-label="Previous month">&larr;</button>
+        <span class="month-name" id="monthName"></span>
+        <button type="button" id="next" aria-label="Next month">&rarr;</button>
+        <button type="button" id="today">Today</button>
+      </div>
+      <span class="spacer"></span>
+      <span id="shown" style="color:var(--ink-faint);font-size:12px"></span>
+      <button type="button" class="ghost" id="ics">Export .ics</button>
+    </div>
+    <div class="card" id="view"></div>
+  </main>
+</div>
+
+<footer id="foot"></footer>
+
+<script>
+const DATA = __EVENT_DATA__;
+const META = __META__;
+
+const EVENTS = DATA.map((e, i) => Object.assign({ _i: i }, e));
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+/* Dates are plain YYYY-MM-DD strings; parse them as local time so the grid
+   never slides a day because of a UTC offset. */
+function parseDay(s) { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); }
+/* Step by calendar days, not by 24h of milliseconds: the first Sunday in
+   November is 25 hours long and ms arithmetic silently repeats that date. */
+function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+function key(d) {
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function fmtTime(hhmm) {
+  if (!hhmm) return "";
+  let [h, m] = hhmm.split(":").map(Number);
+  const ap = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  return h + (m ? ":" + String(m).padStart(2, "0") : "") + " " + ap;
+}
+function colorClass(e) {
+  if (e.source === "championships") return "champ";
+  const p = e.products || [];
+  for (const k of ["tcg", "vg", "pgo", "unite"]) if (p.includes(k)) return k;
+  return "";
+}
+/* Event websites are typed in by store owners and arrive unchecked, so
+   only ordinary web links are allowed through to an href. */
+function safeUrl(u) {
+  const text = String(u == null ? "" : u).trim();
+  if (!text) return "";
+  if (/^https?:\/\//i.test(text)) return text;
+  /* A bare domain is common in this feed and is safe to assume is https. */
+  if (/^[\w-]+(\.[\w-]+)+([/?#].*)?$/.test(text)) return "https://" + text;
+  return "";
+}
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+/* ---------- filter state ---------- */
+const STORE_KEY = "ptcg-calendar-filters-v1";
+const state = {
+  view: "month",
+  cursor: null,
+  q: "",
+  dist: Number("__MAX_RADIUS__"),
+  products: new Set(),
+  types: new Set(),
+  venues: new Set(),
+  champOn: true,
+  champRegion: "all",
+};
+
+const ALL_PRODUCTS = ["tcg", "vg", "pgo", "unite"];
+const PRODUCT_NAME = { tcg: "Trading Card Game", vg: "Video Game", pgo: "Pokémon GO", unite: "UNITE" };
+
+function uniqueSorted(list) { return Array.from(new Set(list.filter(Boolean))).sort((a, b) => a.localeCompare(b)); }
+
+const ALL_TYPES = uniqueSorted(EVENTS.map(e => e.type));
+const ALL_VENUES = uniqueSorted(EVENTS.filter(e => e.source === "locator").map(e => e.venue));
+const ALL_REGIONS = uniqueSorted(EVENTS.filter(e => e.source === "championships").map(e => e.region));
+
+ALL_PRODUCTS.forEach(p => state.products.add(p));
+ALL_TYPES.forEach(t => state.types.add(t));
+ALL_VENUES.forEach(v => state.venues.add(v));
+
+function saveState() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify({
+      view: state.view, q: state.q, dist: state.dist,
+      products: [...state.products], types: [...state.types], venues: [...state.venues],
+      champOn: state.champOn, champRegion: state.champRegion,
+    }));
+  } catch (_) { /* private browsing, ignore */ }
+}
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+    if (!saved) return;
+    state.view = saved.view || state.view;
+    state.q = saved.q || "";
+    if (typeof saved.dist === "number") state.dist = saved.dist;
+    if (saved.products) state.products = new Set(saved.products.filter(p => ALL_PRODUCTS.includes(p)));
+    if (saved.types) state.types = new Set(ALL_TYPES.filter(t => saved.types.includes(t)));
+    if (saved.venues) state.venues = new Set(ALL_VENUES.filter(v => saved.venues.includes(v)));
+    /* If an update renamed or dropped everything that was ticked, fall back to
+       showing all of it rather than an empty calendar. */
+    if (state.types.size === 0) ALL_TYPES.forEach(t => state.types.add(t));
+    if (state.venues.size === 0) ALL_VENUES.forEach(v => state.venues.add(v));
+    if (typeof saved.champOn === "boolean") state.champOn = saved.champOn;
+    state.champRegion = saved.champRegion || "all";
+  } catch (_) { /* ignore */ }
+}
+
+/* ---------- filtering ---------- */
+function matches(e) {
+  if (e.source === "championships") {
+    if (!state.champOn) return false;
+    if (state.champRegion !== "all" && e.region !== state.champRegion) return false;
+  } else {
+    if (!state.venues.has(e.venue)) return false;
+    if (e.distance_mi != null && e.distance_mi > state.dist) return false;
+    const prods = e.products || [];
+    if (prods.length && !prods.some(p => state.products.has(p))) return false;
+  }
+  if (!state.types.has(e.type)) return false;
+  if (state.q) {
+    const hay = [e.name, e.venue, e.city, e.address, e.type, e.organizer, e.details].join(" ").toLowerCase();
+    if (!hay.includes(state.q.toLowerCase())) return false;
+  }
+  return true;
+}
+function visible() { return EVENTS.filter(matches); }
+
+/* Championship events run several days; index every day they cover. */
+function byDay(events) {
+  const map = new Map();
+  for (const e of events) {
+    let d = parseDay(e.date);
+    const last = parseDay(e.end_date || e.date);
+    let guard = 0;
+    while (d <= last && guard++ < 21) {
+      const k = key(d);
+      if (!map.has(k)) map.set(k, []);
+      map.get(k).push(e);
+      d = addDays(d, 1);
+    }
+  }
+  for (const list of map.values()) {
+    list.sort((a, b) => (a.time || "").localeCompare(b.time || "") || a.name.localeCompare(b.name));
+  }
+  return map;
+}
+
+/* ---------- rendering ---------- */
+const view = document.getElementById("view");
+
+function renderMonth() {
+  const events = visible();
+  const map = byDay(events);
+  const cur = state.cursor;
+  const first = new Date(cur.getFullYear(), cur.getMonth(), 1);
+  const start = addDays(first, -first.getDay());
+  const todayKey = key(new Date());
+
+  let html = '<div class="grid-head">' + DOW.map(d => "<div>" + d + "</div>").join("") + "</div>";
+  html += '<div class="grid">';
+  for (let i = 0; i < 42; i++) {
+    const d = addDays(start, i);
+    if (i >= 35 && d.getMonth() !== cur.getMonth()) break;
+    const k = key(d);
+    const pad = d.getMonth() !== cur.getMonth();
+    const list = map.get(k) || [];
+    html += '<div class="day' + (pad ? " pad" : "") + (k === todayKey ? " today" : "") + '">';
+    html += '<div class="daynum">' + d.getDate() + "</div>";
+    list.slice(0, 4).forEach(e => {
+      html += '<button class="chip ' + colorClass(e) + '" data-i="' + e._i + '" title="' + esc(e.name + " — " + e.venue) + '">' +
+        (e.time ? '<span class="t">' + fmtTime(e.time) + "</span> " : "") +
+        esc(e.generic && e.venue ? e.venue : e.name) + "</button>";
+    });
+    if (list.length > 4) html += '<button class="more" data-day="' + k + '">+' + (list.length - 4) + " more</button>";
+    html += "</div>";
+  }
+  html += "</div>";
+  view.innerHTML = html;
+}
+
+function renderList(fromKey) {
+  const events = visible();
+  const map = byDay(events);
+  const todayKey = key(new Date());
+  /* Start at the displayed month, but never earlier than today, so the
+     default view is "everything still to come" and the arrows still work. */
+  const monthKey = key(new Date(state.cursor.getFullYear(), state.cursor.getMonth(), 1));
+  const startKey = fromKey || (monthKey > todayKey ? monthKey : todayKey);
+  const days = [...map.keys()].filter(k => k >= startKey).sort();
+
+  if (!days.length) { view.innerHTML = '<div class="empty">No events match these filters.</div>'; return; }
+
+  let html = "";
+  for (const k of days) {
+    const d = parseDay(k);
+    html += '<div class="daygroup"><h3>' + DOW[d.getDay()] + ", " + MONTHS[d.getMonth()] + " " + d.getDate() + "</h3>";
+    for (const e of map.get(k)) {
+      const dist = e.distance_mi != null ? e.distance_mi + " mi" : "";
+      html += '<button class="row ' + colorClass(e) + '" data-i="' + e._i + '">' +
+        '<span class="when">' + (e.all_day ? "All day" : fmtTime(e.time)) + "</span>" +
+        '<span class="what"><b>' + esc(e.generic && e.venue ? e.venue : e.name) +
+        "</b><span>" + esc(e.generic ? e.type : e.venue) +
+        (e.city ? " &middot; " + esc(e.city) : "") +
+        (e.generic ? "" : " &middot; " + esc(e.type)) + "</span></span>" +
+        '<span class="dist">' + dist + "</span></button>";
+    }
+    html += "</div>";
+  }
+  view.innerHTML = html;
+}
+
+function render() {
+  const events = visible();
+  document.getElementById("monthName").textContent = MONTHS[state.cursor.getMonth()] + " " + state.cursor.getFullYear();
+  document.getElementById("shown").textContent = events.length + " of " + EVENTS.length + " events";
+  document.getElementById("vMonth").setAttribute("aria-pressed", state.view === "month");
+  document.getElementById("vList").setAttribute("aria-pressed", state.view === "list");
+  if (state.view === "month") renderMonth(); else renderList();
+  renderStats(events);
+  saveState();
+}
+
+function renderStats(events) {
+  const now = new Date();
+  const in7 = key(addDays(now, 7));
+  const todayKey = key(now);
+  const week = events.filter(e => e.date >= todayKey && e.date <= in7).length;
+  const stores = new Set(events.filter(e => e.source === "locator").map(e => e.venue)).size;
+  const nextChamp = events.filter(e => e.source === "championships" && e.end_date >= todayKey)
+    .sort((a, b) => a.date.localeCompare(b.date))[0];
+  const champLabel = nextChamp ? nextChamp.name.replace(/^\d{4}\s+/, "").replace(" Pokémon", "") : "—";
+  document.getElementById("stats").innerHTML =
+    '<div class="stat"><b>' + events.length + "</b><span>Events</span></div>" +
+    '<div class="stat"><b>' + week + "</b><span>Next 7 days</span></div>" +
+    '<div class="stat"><b>' + stores + "</b><span>Stores</span></div>" +
+    '<div class="stat" style="min-width:auto"><b style="font-size:13px;line-height:1.35;max-width:260px">' +
+      esc(champLabel) + "</b><span>Next championship</span></div>";
+}
+
+/* ---------- detail drawer ---------- */
+function gcalLink(e) {
+  const pad = s => String(s).padStart(2, "0");
+  let dates;
+  if (e.all_day) {
+    const end = addDays(parseDay(e.end_date || e.date), 1);
+    dates = e.date.replace(/-/g, "") + "/" + key(end).replace(/-/g, "");
+  } else {
+    const start = e.start.replace(/[-:]/g, "").slice(0, 15);
+    const [h, m] = (e.time || "12:00").split(":").map(Number);
+    const endD = new Date(parseDay(e.date));
+    endD.setHours(h + 3, m);
+    const end = key(endD).replace(/-/g, "") + "T" + pad(endD.getHours()) + pad(endD.getMinutes()) + "00";
+    dates = start + "/" + end;
+  }
+  const params = new URLSearchParams({
+    action: "TEMPLATE", text: e.name, dates: dates,
+    details: [e.type, e.admission && "Admission: " + e.admission, safeUrl(e.website), e.details].filter(Boolean).join("\n"),
+    location: e.address || e.venue,
+  });
+  return "https://calendar.google.com/calendar/render?" + params;
+}
+
+function openDetail(e) {
+  const scrim = document.createElement("div");
+  scrim.className = "scrim";
+  const d = parseDay(e.date);
+  const when = DOW[d.getDay()] + ", " + MONTHS[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear() +
+    (e.all_day ? (e.end_date !== e.date ? " – " + MONTHS[parseDay(e.end_date).getMonth()] + " " + parseDay(e.end_date).getDate() : "") : " at " + fmtTime(e.time));
+
+  const rows = [
+    ["When", when],
+    ["Type", e.type],
+    ["Venue", e.venue],
+    ["Address", e.address],
+    ["Distance", e.distance_mi != null ? e.distance_mi + " miles away" : ""],
+    ["Admission", e.admission],
+    ["Organizer", e.organizer],
+    ["Region", e.region],
+    ["Registration", e.registration_end ? "closes " + e.registration_end.replace("T", " ") : ""],
+    ["Phone", e.phone],
+    ["Email", e.email],
+    ["Event ID", e.display_id],
+  ].filter(r => r[1]);
+
+  scrim.innerHTML = '<div class="drawer" role="dialog" aria-modal="true">' +
+    '<button class="close" aria-label="Close">&times;</button>' +
+    "<h2>" + esc(e.name) + "</h2>" +
+    '<div class="badges">' +
+      (e.products || []).map((p, i) => '<span class="badge ' + (e.source === "championships" ? "champ" : p) + '">' +
+        esc((e.product_labels || [])[i] || p) + "</span>").join("") +
+      (e.source === "championships" ? '<span class="badge champ">Championship Series</span>' : "") +
+    "</div>" +
+    "<dl>" + rows.map(r => "<dt>" + r[0] + "</dt><dd>" + esc(r[1]) + "</dd>").join("") + "</dl>" +
+    (e.details ? '<div class="notes">' + esc(e.details) + "</div>" : "") +
+    '<div class="actions">' +
+      '<a class="primary" target="_blank" rel="noopener" href="' + esc(gcalLink(e)) + '">Add to Google Calendar</a>' +
+      (e.address ? '<a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(e.address) + '">Directions</a>' : "") +
+      (safeUrl(e.website) ? '<a target="_blank" rel="noopener" href="' + esc(safeUrl(e.website)) + '">Event page</a>' : "") +
+      (safeUrl(e.registration_url) ? '<a target="_blank" rel="noopener" href="' + esc(safeUrl(e.registration_url)) + '">Register</a>' : "") +
+    "</div></div>";
+
+  scrim.addEventListener("click", ev => {
+    if (ev.target === scrim || ev.target.classList.contains("close")) scrim.remove();
+  });
+  document.addEventListener("keydown", function esc2(ev) {
+    if (ev.key === "Escape") { scrim.remove(); document.removeEventListener("keydown", esc2); }
+  });
+  document.body.appendChild(scrim);
+}
+
+/* ---------- .ics export ---------- */
+function toICS(events) {
+  const pad = n => String(n).padStart(2, "0");
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//PTCG Calendar//EN", "CALSCALE:GREGORIAN"];
+  for (const e of events) {
+    lines.push("BEGIN:VEVENT", "UID:" + e.id + "@ptcg-calendar");
+    if (e.all_day) {
+      const end = addDays(parseDay(e.end_date || e.date), 1);
+      lines.push("DTSTART;VALUE=DATE:" + e.date.replace(/-/g, ""), "DTEND;VALUE=DATE:" + key(end).replace(/-/g, ""));
+    } else {
+      const [h, m] = (e.time || "12:00").split(":").map(Number);
+      const endD = parseDay(e.date); endD.setHours(h + 3, m);
+      lines.push(
+        "DTSTART:" + e.date.replace(/-/g, "") + "T" + (e.time || "12:00").replace(":", "") + "00",
+        "DTEND:" + key(endD).replace(/-/g, "") + "T" + pad(endD.getHours()) + pad(endD.getMinutes()) + "00"
+      );
+    }
+    const fold = s => String(s).replace(/([,;\\])/g, "\\$1").replace(/\n/g, "\\n");
+    lines.push("SUMMARY:" + fold(e.name));
+    if (e.address) lines.push("LOCATION:" + fold(e.address));
+    lines.push("DESCRIPTION:" + fold([e.type, e.admission && "Admission: " + e.admission, safeUrl(e.website), e.details].filter(Boolean).join("\n")));
+    lines.push("END:VEVENT");
+  }
+  lines.push("END:VCALENDAR");
+  return lines.join("\r\n");
+}
+
+/* ---------- filter widgets ---------- */
+function checkboxList(container, items, set, onChange, counts) {
+  container.innerHTML = items.map(item => {
+    const n = counts ? counts.get(item.value) || 0 : null;
+    return '<label class="check"><input type="checkbox" value="' + esc(item.value) + '"' +
+      (set.has(item.value) ? " checked" : "") + ">" +
+      (item.color ? '<span class="swatch" style="background:var(--' + item.color + ')"></span>' : "") +
+      "<span>" + esc(item.label) + "</span>" +
+      (n != null ? '<span class="cnt">' + n + "</span>" : "") + "</label>";
+  }).join("");
+  container.onchange = ev => {
+    const cb = ev.target;
+    if (cb.checked) set.add(cb.value); else set.delete(cb.value);
+    onChange();
+  };
+}
+
+function countBy(fn) {
+  const m = new Map();
+  for (const e of EVENTS) { const k = fn(e); if (k) m.set(k, (m.get(k) || 0) + 1); }
+  return m;
+}
+
+function buildFilters() {
+  checkboxList(document.getElementById("fProducts"),
+    ALL_PRODUCTS.map(p => ({ value: p, label: PRODUCT_NAME[p], color: p })),
+    state.products, render, countBy(e => (e.products || [])[0]));
+
+  checkboxList(document.getElementById("fTypes"),
+    ALL_TYPES.map(t => ({ value: t, label: t })), state.types, render, countBy(e => e.type));
+
+  drawVenues();
+
+  const sel = document.getElementById("champRegion");
+  sel.innerHTML = '<option value="all">All regions</option>' +
+    ALL_REGIONS.map(r => '<option value="' + esc(r) + '">' + esc(r) + "</option>").join("");
+  sel.value = state.champRegion;
+}
+
+function drawVenues() {
+  const q = document.getElementById("venueQ").value.toLowerCase();
+  const items = ALL_VENUES.filter(v => v.toLowerCase().includes(q)).map(v => ({ value: v, label: v }));
+  checkboxList(document.getElementById("fVenues"), items, state.venues, render, countBy(e => e.source === "locator" ? e.venue : null));
+}
+
+/* ---------- wiring ---------- */
+loadState();
+/* A saved distance can exceed the radius this page was built with. */
+state.dist = Math.min(state.dist, Number("__MAX_RADIUS__"));
+state.cursor = new Date();
+state.cursor.setDate(1);
+buildFilters();
+
+document.getElementById("q").value = state.q;
+document.getElementById("dist").value = state.dist;
+document.getElementById("distVal").textContent = state.dist + " mi";
+document.getElementById("champOn").checked = state.champOn;
+
+document.getElementById("q").addEventListener("input", ev => { state.q = ev.target.value; render(); });
+document.getElementById("dist").addEventListener("input", ev => {
+  state.dist = Number(ev.target.value);
+  document.getElementById("distVal").textContent = state.dist + " mi";
+  render();
+});
+document.getElementById("venueQ").addEventListener("input", drawVenues);
+document.getElementById("champOn").addEventListener("change", ev => { state.champOn = ev.target.checked; render(); });
+document.getElementById("champRegion").addEventListener("change", ev => { state.champRegion = ev.target.value; render(); });
+
+document.querySelectorAll("[data-all]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const which = btn.dataset.all;
+    const target = which === "product" ? [state.products, ALL_PRODUCTS] : which === "type" ? [state.types, ALL_TYPES] : [state.venues, ALL_VENUES];
+    const [set, all] = target;
+    if (set.size === all.length) set.clear(); else all.forEach(v => set.add(v));
+    buildFilters(); render();
+  });
+});
+
+document.getElementById("reset").addEventListener("click", () => {
+  try { localStorage.removeItem(STORE_KEY); } catch (_) {}
+  location.reload();
+});
+
+document.getElementById("vMonth").addEventListener("click", () => { state.view = "month"; render(); });
+document.getElementById("vList").addEventListener("click", () => { state.view = "list"; render(); });
+document.getElementById("prev").addEventListener("click", () => { state.cursor.setMonth(state.cursor.getMonth() - 1); render(); });
+document.getElementById("next").addEventListener("click", () => { state.cursor.setMonth(state.cursor.getMonth() + 1); render(); });
+document.getElementById("today").addEventListener("click", () => { state.cursor = new Date(); state.cursor.setDate(1); render(); });
+
+document.getElementById("ics").addEventListener("click", () => {
+  const blob = new Blob([toICS(visible())], { type: "text/calendar;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "pokemon-events.ics";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+
+view.addEventListener("click", ev => {
+  const chip = ev.target.closest("[data-i]");
+  if (chip) { openDetail(EVENTS[Number(chip.dataset.i)]); return; }
+  const more = ev.target.closest("[data-day]");
+  if (more) { state.view = "list"; render(); renderList(more.dataset.day); }
+});
+
+document.getElementById("notices").innerHTML = (META.notices || [])
+  .map(n => '<div class="notice">' + esc(n) + "</div>").join("");
+document.getElementById("sub").textContent =
+  "Within " + META.radius_miles + " miles of " + META.center_label +
+  " · Play! Pokémon Event Locator + Championship Series · updated " + META.updated_human;
+document.getElementById("foot").innerHTML =
+  "Data pulled from events.pokemon.com and championships.pokemon.com on " + esc(META.updated_human) +
+  ". Re-run <code>python3 update.py</code> to refresh. Times are local to each venue; always confirm with the store before travelling.";
+
+render();
+</script>
+</body>
+</html>

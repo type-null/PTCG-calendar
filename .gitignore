@@ -1,0 +1,14 @@
+# Generated calendar — rebuilt by `python3 update.py`
+calendar.html
+
+# Fetched data and caches. The geocode cache is kept: it is small, slow to
+# rebuild, and sparing it saves everyone a round of Nominatim requests.
+data/*
+!data/geocode_cache.json
+
+# Python
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store
