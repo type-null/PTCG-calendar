@@ -1,0 +1,13 @@
+{
+  "center": {
+    "label": "Charlotte, NC",
+    "latitude": 35.2271,
+    "longitude": -80.8431
+  },
+  "radius_miles": 50,
+  "days_ahead": 180,
+  "include_championships": true,
+  "geocode_championships": true,
+  "title": "Charlotte Pokémon Event Calendar",
+  "output": "calendar.html"
+}
